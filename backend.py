@@ -1,69 +1,55 @@
-import os
-import bs4
-import getpass
 from langchain import hub
-from dotenv import load_dotenv
-from langchain_community.vectorstores import Chroma
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain.chains import RetrievalQA
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from langchain.callbacks.manager import CallbackManager
+from langchain.llms import Ollama
+from langchain.embeddings.ollama import OllamaEmbeddings
+from langchain.vectorstores import Chroma
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import WebBaseLoader
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
-from langchain_core.prompts import PromptTemplate
-from langchain.schema import (
-    SystemMessage,
-    HumanMessage,
-    AIMessage
-)
+from langchain.document_loaders import PyPDFLoader
+from langchain.prompts import PromptTemplate
+from langchain.memory import ConversationBufferMemory
+import os
+import time
 
-def response(user_query):
+def readpdf(file):
+    f = open(file,"rb")
+    mf = f.readAll()
+    filepath = mf
+    localmodel = "llama3.1"
+    embeding = "nomic-embed-text"
 
-    # Load environment and get your openAI api key
-    load_dotenv()
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-
-
-    # Select a webpage to load the context information from
-    loader = WebBaseLoader(
-        web_paths=("https://www.linkedin.com/pulse/insights-post-pandemic-economy-our-2024-global-market-rob-sharps-jcnmc/",),
-    )
-    docs = loader.load()
+    loader = PyPDFLoader(filepath)
+    data = loader.load()
 
 
-    # Restructure to process the info in chunks
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    splits = text_splitter.split_documents(docs)
-    vectorstore = Chroma.from_documents(documents=splits, embedding=OpenAIEmbeddings())
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=100)
+    all_splits = text_splitter.split_documents(data)
+    persist_directory = 'data'
+
+    vectorstore = Chroma.from_documents(all_splits, embedding=OllamaEmbeddings(model=embeding), persist_directory=persist_directory)
+    
+    llm = Ollama(base_url="http://localhost:11434", model=localmodel, verbose=True,
+                 callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
+    retriever = vectorstore.as_retriever()
+
+    template = """ Answer the question based only on the following
+    context: {context}
+
+    User: {question}
+    Chatbot:
+    """
+    prompt = PromptTemplate(input_variables=["context","question"], template=template,)
+    #memory = ConversationBufferMemory(memory_key="history", return_messages=True, input_key="question")
+
+    qa_chain = RetrievalQA.from_chain_type(llm=llm, chain_type='stuff', retriever=retriever, verbose=False,
+                                           chain_type_kwargs={
+                                               #"verbose": True,
+                                               "prompt": prompt,
+                                               #"memory": memory,
+                                           })
 
 
-    # Retrieve info from chosen source
-    retriever = vectorstore.as_retriever(search_type="similarity")
-    prompt = hub.pull("rlm/rag-prompt")
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0, openai_api_key=openai_api_key)
-
-    def format_docs(docs):
-        return "\n\n".join(doc.page_content for doc in docs)
-
-
-
-    template = """Use the following pieces of context to answer the question at the end.
-    Say that you don't know when asked a question you don't know, donot make up an answer. Be precise and concise in your answer.
-
-    {context}
-
-    Question: {question}
-
-    Helpful Answer:"""
-
-    # Add the context to your user query
-    custom_rag_prompt = PromptTemplate.from_template(template)
-
-    rag_chain = (
-        {"context": retriever | format_docs, "question": RunnablePassthrough()}
-        | custom_rag_prompt
-        | llm
-        | StrOutputParser()
-    )
-
-    return rag_chain.invoke(user_query) 
+    query = ""
+    res = qa_chain.invoke({"query": query})
+    return res
