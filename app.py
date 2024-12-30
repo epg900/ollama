@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from backend import response
+#from backend import response
 
 
 app = Flask(__name__)
@@ -12,7 +12,7 @@ def index():
 @app.route('/chat', methods=['GET', 'POST'])
 def chat():
     message = request.form['msg']
-    return response(message)
+    return message
 
 
 
