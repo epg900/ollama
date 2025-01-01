@@ -2,9 +2,12 @@ from langchain import hub
 from langchain.chains import RetrievalQA
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.callbacks.manager import CallbackManager
-from langchain.llms import Ollama
-from langchain.embeddings.ollama import OllamaEmbeddings
-from langchain.vectorstores import Chroma
+#from langchain.llms import Ollama
+#from langchain.embeddings.ollama import OllamaEmbeddings
+#from langchain.vectorstores import Chroma
+from langchain_ollama import OllamaLLM
+from langchain_ollama import OllamaEmbeddings
+from langchain_chroma import Chroma
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import PyPDFLoader
 from langchain.prompts import PromptTemplate
