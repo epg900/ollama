@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-#from lamachatapp.backend import pdflrn,pdfres
+from lamachatapp.backend import pdflrn,pdfres
 # Create your views here.
 
 def index(request):
@@ -12,11 +12,11 @@ def res(request):
     msg = ""
     if request.method == "POST":
         msg = request.POST['msg']
-    response = msg
-    #response = pdfres(msg)
+    #response = msg
+    response = pdfres(msg)
     return HttpResponse(response)
 
 def pdf(request):
-    return True #pdflrn("/content/test.pdf")
+    return pdflrn("/content/test.pdf")
     
     
