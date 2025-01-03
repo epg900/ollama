@@ -33,7 +33,7 @@
 						<div class="loading"><div id="loading" class="loader" ></div></div>
 						<div class="card-footer">
 							<form id="messageArea" class="input-group" method="POST" >
-								{% csrf_token %}
+							
                                 <input type="text" id="text" name="msg" placeholder="Type your message..." autocomplete="off" class="form-control type_msg" required/>
 								<div class="input-group-append">
 									<button type="submit" id="send" class="input-group-text send_btn" onclick="loading();"><img src="{% static 'send32.png' %}"></button>
@@ -83,7 +83,7 @@
 					$.ajax({
 						data: {
 							msg: rawText,
-							csrfmiddlewaretoken: "{{ csrf_token }}",							
+							//csrfmiddlewaretoken: "{{ csrf_token }}",							
 						},
 						type: "POST",
 						url: "/chat/res/",							
