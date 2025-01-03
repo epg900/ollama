@@ -16,7 +16,7 @@ import os
 import time
 
 persist_directory = '/tmp/data'
-localmodel = "llama3.1"
+localmodel = "llama3.2"
 embeding = "nomic-embed-text"
 
 def pdflrn(file):
