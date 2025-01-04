@@ -17,6 +17,6 @@ def res(request):
     return HttpResponse(response)
 
 def pdf(request):
-    return pdflrn("/content/test.pdf")
+    return HttpResponse(pdflrn("/content/test.pdf"))
     
     

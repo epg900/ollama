@@ -29,7 +29,7 @@ def pdflrn(file):
 
     vectorstore = Chroma.from_documents(all_splits, embedding=OllamaEmbeddings(model=embeding), persist_directory=persist_directory)
     
-    return "OK"
+    return "PDF learned"
 
 def pdfres(query):
   vectorstore = Chroma(embedding_function=OllamaEmbeddings(model=embeding), persist_directory=persist_directory)
