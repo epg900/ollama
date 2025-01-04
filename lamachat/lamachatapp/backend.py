@@ -33,7 +33,7 @@ def pdflrn(file):
 
 def pdfres(query):
   vectorstore = Chroma(embedding_function=OllamaEmbeddings(model=embeding), persist_directory=persist_directory)
-  llm = Ollama(base_url="http://localhost:11434", model=localmodel, verbose=False,
+  llm = OllamaLLM(base_url="http://localhost:11434", model=localmodel, verbose=False,
               callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
   retriever = vectorstore.as_retriever()
 
