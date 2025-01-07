@@ -13,10 +13,10 @@ def res(request):
     if request.method == "POST":
         msg = request.POST['msg']
     #response = msg
-    response = pdfres(msg)
-    return HttpResponse(response)
+    response = pdfres(msg,"data")
+    return HttpResponse(response['result'])
 
 def pdf(request):
-    return HttpResponse(pdflrn("/content/test.pdf"))
+    return HttpResponse(pdflrn("aaa.pdf","data"))
     
     
