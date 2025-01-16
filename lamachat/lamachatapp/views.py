@@ -1,7 +1,7 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from lamachatapp.backend import pdflrn,pdfres
+from lamachatapp.backend import pdflrn,pdfres,chat
 # Create your views here.
 
 def index(request):
@@ -12,11 +12,20 @@ def res(request):
     msg = ""
     if request.method == "POST":
         msg = request.POST['msg']
-    #response = msg
-    response = pdfres(msg,"data")
-    return HttpResponse(response['result'])
+    #return StreamingHttpResponse(pdfres(msg,"data","llama3.2","nomic-embed-text"))
+    return HttpResponse(pdfres(msg,"data","llama3.2","nomic-embed-text"))
 
 def pdf(request):
-    return HttpResponse(pdflrn("file.pdf","data"))
+    return HttpResponse(pdflrn("aaa.pdf","data","nomic-embed-text"))
+
+
+@csrf_exempt
+def chatai(request):
+    msg = ""
+    if request.method == "POST":
+        msg = request.POST['msg']
+        return StreamingHttpResponse(chat(msg))
+    return render(request,"chat.html")
+    
     
     

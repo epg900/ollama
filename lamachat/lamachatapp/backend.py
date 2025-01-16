@@ -1,8 +1,8 @@
-# @title Start Server (Initialize)
 from langchain import hub
 from langchain.chains import RetrievalQA
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.callbacks.manager import CallbackManager
+from langchain_ollama import ChatOllama
 from langchain_ollama import OllamaLLM
 from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma
@@ -12,12 +12,10 @@ from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 import os
 import time
-from google.colab import files
 
-localmodel = "llama3.2"
-embeding = "nomic-embed-text"
 
-def pdflrn(file,path):
+
+def pdflrn(file,path,embedmodel):
   loader = PyPDFLoader(file)
   data = loader.load()
 
@@ -26,12 +24,12 @@ def pdflrn(file,path):
   all_splits = text_splitter.split_documents(data)
 
 
-  vectorstore = Chroma.from_documents(all_splits, embedding=OllamaEmbeddings(model=embeding), persist_directory=path)
+  vectorstore = Chroma.from_documents(all_splits, embedding=OllamaEmbeddings(model=embedmodel), persist_directory=path)
   return True
 
-def pdfres(query,path):
-  vectorstore = Chroma(embedding_function=OllamaEmbeddings(model=embeding), persist_directory=path)
-  llm = OllamaLLM(base_url="http://localhost:11434", model=localmodel, verbose=True,
+def pdfres(query,path,model,embedmodel):
+  vectorstore = Chroma(embedding_function=OllamaEmbeddings(model=embedmodel), persist_directory=path)
+  llm = OllamaLLM(base_url="http://localhost:11434", model=model, verbose=True,                  
               callbacks=[StreamingStdOutCallbackHandler()])
   retriever = vectorstore.as_retriever()
 
@@ -51,4 +49,10 @@ def pdfres(query,path):
                                             #"memory": memory,
                                         })
   res = qa_chain.invoke({"query": query})
-  return res
+  return res["result"]
+  
+
+def chat(query):
+  llm = ChatOllama( model="llama3.2", temperature=1 )
+  for chunk in llm.stream(query):
+    yield chunk.content

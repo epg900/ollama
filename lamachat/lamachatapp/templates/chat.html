@@ -46,27 +46,6 @@
 		</div>
 		
 		<script>
-			function ax(){
-				//e.preventDefault();
-				var text = document.getElementById("text");
-				var message = document.getElementById("messageFormeight");
-				let request = new XMLHttpRequest();
-				request.open("post","/chat/res/", false);
-				//request.setRequestHeader("Content-Type", "multipart/form-data");
-				var fd = new FormData();
-				fd.append("csrfmiddlewaretoken","{{ csrf_token }}");
-				fd.append("msg", text.value )				
-				
-				request.addEventListener('load', function(e) {
-					//window.location.reload();
-					let html = request.response;
-					var botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"></div><div class="msg_cotainer">' + html + '<span class="msg_time"></span></div></div>';
-					message.innerHTML = botHtml;
-									
-				});
-				request.send(fd);
-				}
-			
 			function loading(){	$("#loading").show();}
 
 			function hideLoading(){$("#loading").hide();}	
@@ -86,35 +65,34 @@
 					
 					$("#text").val("");
 					$("#messageFormeight").append(userHtml);
-					//var botHtml = $('<div class="d-flex justify-content-start mb-4 msg_cotainer">') ;
-					//$("#messageFormeight").append(botHtml);
+					var botHtml = $('<div class="d-flex justify-content-start mb-4 msg_cotainer">') ;
+					$("#messageFormeight").append(botHtml);
 					//var botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"></div><div class="msg_cotainer">' + e.target.responseText + '<span class="msg_time">' + str_time + '</span></div></div>';
-								
+					var element = document.getElementById("messageFormeight");			
 					$.ajax({
 						data: {
 							msg: rawText,
 							//csrfmiddlewaretoken: "{{ csrf_token }}",							
 						},
 						type: "POST",
-						url: "/chat/res/",	
-						/*
+						url: "/chat/chat/",	
 						xhrFields: {
 							onprogress: function(e) {
 							var response = e.target.responseText;
 							botHtml.html(function (i, oldHtml) {
+								element.scrollTop = element.scrollHeight;
 								return response;
-								});							
-							}
+								});	
+														
+							}							
 						}
-						*/
 					}).done(function(datares) {						
 						hideLoading();
-						var botHtml = '<div class="d-flex justify-content-start mb-4"><div class="msg_cotainer">' + datares + '</div></div>';
-						$("#messageFormeight").append(botHtml);
 						})
 					
 				});
 			});
+			
 		</script>
         
     </body>

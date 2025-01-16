@@ -20,5 +20,6 @@ from . import views
 urlpatterns = [
     path("", views.index),
     path("res/", views.res),
-    path("pdf/", views.pdf),    
+    path("pdf/", views.pdf),
+    path("chat/", views.chatai),
 ]
